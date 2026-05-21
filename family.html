@@ -19,14 +19,11 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 1. 퀴즈 앱 전체에 하단 여백을 충분히 주어 eSIM 배너가 4버튼 메뉴에 절대 가려지지 않게 조절 */
         .quiz-app {
             padding-bottom: 90px !important;
             box-sizing: border-box !important;
             min-height: calc(100vh - 60px) !important;
         }
-
-        /* 2. 최하단 4버튼 메뉴 바를 화면 맨 위에 고정시키고 배경색을 강제하여 투명화 방지 */
         .bottom-menu {
             display: flex !important;
             position: fixed !important;
@@ -37,8 +34,6 @@
             background-color: #ffffff !important;
             box-shadow: 0 -3px 10px rgba(0,0,0,0.1) !important;
         }
-
-        /* 3. eSIM 광고 박스와 1000문장 배너가 자바스크립트에 의해 숨겨지는 것을 원천 차단 */
         .control-panel, .game-ad-bar, .wide-slim-banner {
             display: block !important;
             visibility: visible !important;
@@ -71,11 +66,13 @@
                     <div id="teacher-tip-text"></div>
                     <div id="today-kr"></div>
                     <div id="today-rom"></div>
+                    <button id="today-mic-btn"></button> 
                     <div id="today-feedback"></div>
                     <div id="today-options"></div>
                 </div>
             </div>
             <div id="category-list"></div>
+            <div class="menu-container"></div>
         </div>
 
         <div id="quiz-screen" class="quiz-screen" style="display: block;">
@@ -107,7 +104,7 @@
             <div class="options-container" id="options-container"></div>
 
             <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px;">
-                <button class="back-link" style="margin-top: 0;" onclick="goHome()">🏠 HOME</button>
+                <button class="back-link" style="margin-top: 0;" onclick="window.location.href='index.html';">🏠 HOME</button>
                 <button class="back-link hint-btn" style="margin-top: 0;" onclick="showCorrectAnswer()">💡 Answer</button>
             </div>
             
