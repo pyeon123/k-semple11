@@ -15,14 +15,6 @@
       gtag('config', 'G-8QTRE4CGNE');
     </script>
 
-    <script>
-        const CURRENT_CAT = "cat_01";
-        if (!location.search.includes('cat=')) {
-            // 화면 새로고침 없이 주소창 뒤에 ?cat=cat_01 을 자연스럽게 붙여줍니다.
-            history.replaceState(null, '', '?cat=' + CURRENT_CAT);
-        }
-    </script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -67,6 +59,10 @@
 
 <script src="date.js"></script>
 <script src="script.js"></script>
+
+<script>
+    window.addEventListener('load', () => startQuiz('cat_01'));
+</script>
  
 </body>
 </html>
