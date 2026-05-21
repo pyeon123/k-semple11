@@ -55,15 +55,19 @@
         </div>
     </div>
 </div>
-   <script>
-    window.onload = function() {
-        if (typeof startQuiz === "function") {
-            startQuiz("cat_01"); // 각 파일에 맞춰 숫자 변경!
-        }
-    };
-</script>
+
 
 <script src="date.js"></script>
 <script src="script.js"></script>
+  <script>
+    // 이 코드 하나만 있으면 됩니다.
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            if (typeof startQuiz === "function") {
+                startQuiz("cat_01"); // 각 파일에 맞춰 숫자 수정
+            }
+        }, 300);
+    });
+</script>
 </body>
 </html>
