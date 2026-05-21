@@ -490,8 +490,15 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// 📌 애플리케이션 초기화 (라우팅 탑재)
-document.addEventListener('DOMContentLoaded', () => {
+// 📌 데이터가 로드될 때까지 기다렸다가 애플리케이션을 초기화하는 함수
+function runApp() {
+    // 1. 데이터가 아직 로드되지 않았다면 0.1초 뒤에 다시 시도
+    if (typeof allQuizData === 'undefined') {
+        setTimeout(runApp, 100); 
+        return;
+    }
+
+    // 2. 데이터가 확인된 후 실행되는 본문 로직
     const userAgent = navigator.userAgent.toLowerCase();
     const isInApp = /kakaotalk|fbav|instagram|line|naver|snapchat|zum|tistory/i.test(userAgent);
     
@@ -500,9 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (openBtn) openBtn.style.display = 'block';
     }
 
-    // 1. 개별 HTML에서 설정한 CURRENT_CAT 변수가 있는지 먼저 확인 (우선순위 높음)
+    // 1. 개별 HTML에서 설정한 CURRENT_CAT 변수가 있는지 먼저 확인
     if (typeof CURRENT_CAT !== 'undefined' && allQuizData[CURRENT_CAT]) {
-        // 물리적인 개별 페이지이므로 해당 카테고리 퀴즈 즉시 시작
         startQuiz(CURRENT_CAT, false); 
     } 
     // 2. 만약 변수가 없다면 기존처럼 URL 파라미터(?cat=...) 확인
@@ -518,4 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSEOData(null); 
         }
     }
-});
+}
+
+// 페이지가 준비되면 runApp 함수를 실행합니다.
+document.addEventListener('DOMContentLoaded', runApp);
