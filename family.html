@@ -42,6 +42,15 @@
         .game-ad-bar {
             display: flex !important;
         }
+
+        /* 🌟 [핵심 해결책] 정답 화면이 생성될 때 광고보다 무조건 위에 띄우는 강제 스타일 */
+        #detail-area {
+            position: relative !important;
+            z-index: 2000 !important; /* 광고 판넬(1000)보다 높게 설정 */
+            background-color: #f8fafc !important; /* 결과 화면 배경색 강제 */
+            border-radius: 20px !important;
+            margin-bottom: 20px !important;
+        }
     </style>
 </head>
 <body>
