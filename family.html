@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 하단 고정 메뉴 및 배너의 정렬을 훼손하지 않기 위한 안심 마진 */
+        /* 화면 스타일 안정화 */
         .quiz-app {
-            padding-bottom: 120px !important;
+            padding-bottom: 140px !important;
             box-sizing: border-box !important;
             min-height: calc(100vh - 60px) !important;
         }
@@ -35,7 +35,8 @@
             background-color: #ffffff !important;
             box-shadow: 0 -3px 10px rgba(0,0,0,0.1) !important;
         }
-        /* 꼼수가 아닌 확실한 오작동 예방용 히든 스타일 */
+        /* 퀴즈 화면은 항시 켜두고 메뉴 화면은 절대 보이지 않게 고정 */
+        #quiz-screen { display: block !important; opacity: 1 !important; visibility: visible !important; }
         #menu-screen { display: none !important; }
     </style>
 </head>
@@ -52,7 +53,7 @@
         
         <div id="menu-screen" class="screen" style="display: none !important;">
             <div id="category-screen"> <div id="guide-box"></div> <div id="guide-content"></div> </div>
-            <div id="today-quiz-section" style="display: none !important;">
+            <div id="today-quiz-section">
                 <div id="today-title"></div>
                 <div id="today-quiz-content">
                     <div id="teacher-tip-text"></div> <div id="today-kr"></div> <div id="today-rom"></div>
@@ -60,11 +61,10 @@
                     <div id="today-feedback"></div> <div id="today-options"></div>
                 </div>
             </div>
-            <div id="category-list" style="display: none !important;"></div> 
-            <div class="menu-container" style="display: none !important;"></div>
+            <div id="category-list"></div> <div class="menu-container"></div>
         </div>
 
-        <div id="quiz-screen" class="quiz-screen" style="display: block;">
+        <div id="quiz-screen" class="quiz-screen">
             <div class="situation-tag" id="situation">Family</div>
 
             <div id="category-tip-container" style="background: #fff9db; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 8px solid #fcc419; text-align: left;">
@@ -90,7 +90,6 @@
             </div>
             
             <div id="feedback" style="height: 35px; font-weight: 900; font-size: 1.4rem; margin-bottom: 10px; text-align: center;"></div>
-            
             <div class="options-container" id="options-container"></div>
 
             <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px; margin-bottom: 20px;">
@@ -122,21 +121,24 @@
 </div>
 
 <script src="date.js"></script>
-
 <script src="script.js"></script>
 
 <script>
-    // 1. 기존 script.js가 DOMContentLoaded 이벤트를 기다리며 헛짓물 켜기 전에 전역 변수 사전 세팅
+    // 1. script.js가 DOMContentLoaded로 뒤늦게 켜져서 메뉴판 그리는 행위를 완전 봉쇄
+    initMenu = function() { return; }; 
+    
+    // 2. 전역 변수에 카테고리 강제 고정
     CURRENT_CAT = 'cat_01';
     activeCatId = 'cat_01';
 
-    // 2. 주소창 무시하고 cat_01 패밀리 단어장으로 즉각 퀴즈 강제 진입 명령
-    if (typeof allQuizData !== 'undefined') {
-        startQuiz('cat_01', false);
-    } else {
-        // 혹시 데이터가 로딩 지연될 때를 대비한 0.05초 안전 트랙킹
-        setTimeout(function() { startQuiz('cat_01', false); }, 500);
-    }
+    // 3. 페이지가 완전히 로드되면 무조건 패밀리 퀴즈로 화면 세팅
+    window.addEventListener('load', function() {
+        if (typeof startQuiz === 'function') {
+            startQuiz('cat_01', false);
+            // 정답을 맞췄을 때 화면이 비활성화되어 하단이 다 날아가는 원본 버그 제어
+            document.getElementById('quiz-screen').classList.add('active');
+        }
+    });
 </script>
 </body>
 </html>
