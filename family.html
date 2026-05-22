@@ -19,12 +19,27 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 화면 스타일 안정화 */
-        .quiz-app {
+        /* 🌟 핵심 치트키: 화면에 보여지는 요소들의 순서를 강제로 통제합니다. */
+        .content-area {
+            display: flex !important;
+            flex-direction: column !important;
             padding-bottom: 140px !important;
             box-sizing: border-box !important;
             min-height: calc(100vh - 60px) !important;
         }
+
+        /* 1. 퀴즈 화면과 정답 예문 박스(detail-area)를 무조건 상단에 위치시킵니다. */
+        #quiz-screen { order: 1 !important; display: block !important; }
+        #detail-area { order: 2 !important; display: block !important; margin-top: 20px !important; }
+
+        /* 2. 하단 eSIM 광고 영역을 무조건 정답 예문보다 밑에 배치합니다. */
+        .control-panel { order: 3 !important; text-align: center; margin: 30px auto 10px auto; width: 100%; max-width: 600px; position: relative; z-index: 1000; }
+
+        /* 3. 난동 부리는 메인 메뉴판(박스 3개)은 구조상 살아있되, 화면에서는 완벽히 지워버립니다. */
+        #menu-screen { display: none !important; }
+        #category-list, .menu-container { display: none !important; }
+
+        /* 4. 최하단 고정 메뉴 바 */
         .bottom-menu {
             display: flex !important;
             position: fixed !important;
@@ -35,9 +50,6 @@
             background-color: #ffffff !important;
             box-shadow: 0 -3px 10px rgba(0,0,0,0.1) !important;
         }
-        /* 퀴즈 화면은 항시 켜두고 메뉴 화면은 절대 보이지 않게 고정 */
-        #quiz-screen { display: block !important; opacity: 1 !important; visibility: visible !important; }
-        #menu-screen { display: none !important; }
     </style>
 </head>
 <body>
@@ -51,7 +63,7 @@
  
     <div class="content-area">
         
-        <div id="menu-screen" class="screen" style="display: none !important;">
+        <div id="menu-screen" class="screen">
             <div id="category-screen"> <div id="guide-box"></div> <div id="guide-content"></div> </div>
             <div id="today-quiz-section">
                 <div id="today-title"></div>
@@ -61,7 +73,8 @@
                     <div id="today-feedback"></div> <div id="today-options"></div>
                 </div>
             </div>
-            <div id="category-list"></div> <div class="menu-container"></div>
+            <div id="category-list"></div> 
+            <div class="menu-container"></div>
         </div>
 
         <div id="quiz-screen" class="quiz-screen">
@@ -90,6 +103,7 @@
             </div>
             
             <div id="feedback" style="height: 35px; font-weight: 900; font-size: 1.4rem; margin-bottom: 10px; text-align: center;"></div>
+            
             <div class="options-container" id="options-container"></div>
 
             <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px; margin-bottom: 20px;">
@@ -98,7 +112,7 @@
             </div>
         </div>
 
-        <div class="control-panel" style="text-align: center; margin: 30px auto 10px auto; width: 100%; max-width: 600px; position: relative; z-index: 1000;">
+        <div class="control-panel">
             <div class="game-ad-bar" style="display: flex !important;">
                 <div class="korea-badge">🇰🇷</div>
                 <a href="https://breezesim.com/products/esim-south-korea?sca_ref=10996533.84IFCCRU2g" target="_blank" class="esim-btn-link">Get Korea eSIM</a>
@@ -124,18 +138,16 @@
 <script src="script.js"></script>
 
 <script>
-    // 1. script.js가 DOMContentLoaded로 뒤늦게 켜져서 메뉴판 그리는 행위를 완전 봉쇄
-    initMenu = function() { return; }; 
-    
-    // 2. 전역 변수에 카테고리 강제 고정
+    // 1. 뒤늦게 실행되는 initMenu가 3개 박스를 화면에 추가하더라도 CSS display: none이 원천 봉쇄함
+    // 2. 변수 사전 고정
     CURRENT_CAT = 'cat_01';
     activeCatId = 'cat_01';
 
-    // 3. 페이지가 완전히 로드되면 무조건 패밀리 퀴즈로 화면 세팅
+    // 3. 페이지 로드 완료 즉시 패밀리 퀴즈 실행 유도
     window.addEventListener('load', function() {
         if (typeof startQuiz === 'function') {
             startQuiz('cat_01', false);
-            // 정답을 맞췄을 때 화면이 비활성화되어 하단이 다 날아가는 원본 버그 제어
+            // 정답을 체크했을 때 화면이 통째로 숨겨지는 원본 로직 강제 방어
             document.getElementById('quiz-screen').classList.add('active');
         }
     });
