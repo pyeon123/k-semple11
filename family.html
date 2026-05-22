@@ -2,12 +2,6 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    
-    <title id="seo-title">Learn Family in Korean - Free Interactive Quiz</title>
-    <meta id="seo-desc" name="description" content="Master essential Korean Family vocabulary. Practice pronunciation and test your skills with our free interactive Family quiz!">
-    <meta name="keywords" content="Learn Korean, Korean Quiz, Family Korean, Korean Vocabulary">
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8QTRE4CGNE"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,68 +9,14 @@
       gtag('js', new Date());
       gtag('config', 'G-8QTRE4CGNE');
     </script>
-
-    <script>
-        window.CURRENT_CAT = 'cat_01';
-        window.activeCatId = 'cat_01';
-    </script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    
+    <title id="seo-title">Learn Korean Game: Family Word Quiz (FREE)</title>
+    <meta id="seo-desc" name="description" content="Master Korean through fun interactive games! Challenge yourself with over 1,000 Korean Word quizzes. Perfect for K-Drama fans and learners worldwide.">
+    <meta name="keywords" content="Learn Korean, Korean Quiz, K-Drama Phrases, Basic Korean, Korean Vocabulary">
 
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* 하단 박스 3개 및 가짜 메뉴 레이아웃 원천 숨김 */
-        #menu-screen, #category-list, .menu-container, #category-screen, #today-quiz-section {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            height: 0 !important;
-            max-height: 0 !important;
-            overflow: hidden !important;
-        }
-
-        #quiz-screen {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        .content-area {
-            display: flex !important;
-            flex-direction: column !important;
-            padding-bottom: 120px !important;
-            box-sizing: border-box !important;
-        }
-        
-        #quiz-screen { order: 1 !important; }
-        
-        /* 예문 박스가 무조건 광고 위에 배치되도록 유동성 부여 */
-        #detail-area, .quiz-detail-box {
-            order: 2 !important;
-            display: block !important;
-            margin: 20px auto !important;
-            width: 100% !important;
-        }
-
-        .control-panel {
-            order: 3 !important;
-            display: block !important;
-            text-align: center !important;
-            margin: 30px auto 20px auto !important;
-            width: 100% !important;
-            max-width: 600px !important;
-        }
-
-        .bottom-menu {
-            display: flex !important;
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 99999 !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.1) !important;
-        }
-    </style>
 </head>
 <body>
 
@@ -85,17 +25,17 @@
         🔗 FB.TikTok / Sound Problem? >> Click here to open in New Window
     </div>
 
-    <h1 id="main-header" class="header">Korean Vocabulary Quiz</h1>
+    <h1 id="main-header" class="header">Learn Korean Game: Family Quiz</h1>
  
     <div class="content-area">
         
-        <div id="quiz-screen" class="quiz-screen">
-            <div class="situation-tag" id="situation">Family</div>
+        <div id="quiz-screen" class="quiz-screen active">
+            <div class="situation-tag" id="situation">---</div>
 
             <div id="category-tip-container" style="background: #fff9db; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 8px solid #fcc419; text-align: left;">
                 <div style="font-weight: bold; color: #925211; font-size: 0.9rem; margin-bottom: 5px;">👩‍🏫 Teacher's Tip</div>
                 <div id="category-tip-text" style="font-size: 1.4rem; font-weight: 800; color: #5f3e07; line-height: 1.4;">
-                    Listen and repeat the phrase!
+                    Tap to start learning!
                 </div>
             </div>
 
@@ -115,16 +55,19 @@
             </div>
             
             <div id="feedback" style="height: 35px; font-weight: 900; font-size: 1.4rem; margin-bottom: 10px; text-align: center;"></div>
+            
             <div class="options-container" id="options-container"></div>
 
-            <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px; margin-bottom: 20px;">
-                <button class="back-link" style="margin-top: 0;" onclick="window.location.href='index.html';">🏠 HOME</button>
+            <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px;">
+                <a href="index.html" class="back-link" style="margin-top: 0; text-decoration: none; display: flex; align-items: center; justify-content: center;">🏠 HOME</a>
                 <button class="back-link hint-btn" style="margin-top: 0;" onclick="showCorrectAnswer()">💡 Answer</button>
             </div>
         </div>
 
-        <div class="control-panel">
-            <div class="game-ad-bar" style="display: flex !important;">
+        <div id="detail-area" class="quiz-detail-box" style="display: none; margin: 25px auto 10px auto; width: 100%; box-sizing: border-box;"></div>
+        
+        <div class="control-panel" style="text-align: center; margin: 25px auto; width: 100%; max-width: 600px; position: relative; z-index: 1000;">
+            <div class="game-ad-bar">
                 <div class="korea-badge">🇰🇷</div>
                 <a href="https://breezesim.com/products/esim-south-korea?sca_ref=10996533.84IFCCRU2g" target="_blank" class="esim-btn-link">Get Korea eSIM</a>
                 <div class="ad-moving-text" id="ad-content">No internet in Korea? You'll need data!</div>
@@ -132,37 +75,32 @@
             </div>
             <br>
             <div style="font-size: 0.9rem; font-weight: bold; color: #64748b;">1,000+ Essential Korean sentences / free</div>
-            <a href="https://kstudy.netlify.app/" target="_blank" class="wide-slim-banner" style="display: block !important;"></a>
+            <a href="https://kstudy.netlify.app/" target="_blank" class="wide-slim-banner"></a>
         </div>
 
     </div>
 </div>
 
 <div class="bottom-menu">
-    <button onclick="shareApp()" class="menu-item"><span class="menu-emoji">📤</span><span class="menu-label">Share</span></button>
-    <button onclick="visitFacebook()" class="menu-item"><span class="menu-emoji">📱</span><span class="menu-label">Facebook</span></button>
-    <button onclick="addToHome()" class="menu-item"><span class="menu-emoji">🏠</span><span class="menu-label">Save App</span></button>
-    <button onclick="sendEmail()" class="menu-item"><span class="menu-emoji">📧</span><span class="menu-label">E-mail</span></button>
+    <button onclick="shareApp()" class="menu-item">
+        <span class="menu-emoji">📤</span>
+        <span class="menu-label">Share</span>
+    </button>
+    <button onclick="visitFacebook()" class="menu-item">
+        <span class="menu-emoji">📱</span>
+        <span class="menu-label">Facebook</span>
+    </button>
+    <button onclick="addToHome()" class="menu-item">
+        <span class="menu-emoji">🏠</span>
+        <span class="menu-label">Save App</span>
+    </button>
+    <button onclick="sendEmail()" class="menu-item">
+        <span class="menu-emoji">📧</span>
+        <span class="menu-label">E-mail</span>
+    </button>
 </div>
 
 <script src="date.js"></script>
-
-<script src="script.js?v=1.1"></script>
-
-<script>
-    window.addEventListener('load', function() {
-        if (typeof startQuiz === 'function') {
-            startQuiz('cat_01', false);
-        }
-        
-        // 정답을 눌렀을 때 생성되는 레이아웃 보정용 타이머 안전장치
-        setInterval(function() {
-            let detail = document.getElementById('detail-area');
-            if (detail) {
-                detail.style.order = "2";
-            }
-        }, 200);
-    });
-</script>
+<script src="script.js"></script>
 </body>
 </html>
