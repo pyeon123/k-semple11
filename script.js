@@ -27,9 +27,9 @@ function visitFacebook() {
 function updateSEOData(catId) {
     if (!catId) {
         // 메인 홈 화면용 기본 SEO
-        document.getElementById('seo-title').innerText = "Learn Korean Game: 1,000+ Word Quiz (FREE)";
-        document.getElementById('seo-desc').setAttribute("content", "Master Korean through fun interactive games! Challenge yourself with over 1,000 Korean Word quizzes. Perfect for K-Drama fans and learners worldwide.");
-        document.getElementById('main-header').innerText = "Learn Korean Game: 1,000+ Word Quiz";
+        if (document.getElementById('seo-title')) document.getElementById('seo-title').innerText = "Learn Korean Game: 1,000+ Word Quiz (FREE)";
+        if (document.getElementById('seo-desc')) document.getElementById('seo-desc').setAttribute("content", "Master Korean through fun interactive games! Challenge yourself with over 1,000 Korean Word quizzes. Perfect for K-Drama fans and learners worldwide.");
+        if (document.getElementById('main-header')) document.getElementById('main-header').innerText = "Learn Korean Game: 1,000+ Word Quiz";
         injectSafeSEOData(null);
         return;
     }
@@ -37,9 +37,9 @@ function updateSEOData(catId) {
     const cat = allQuizData[catId];
     if (cat) {
         // 카테고리에 맞는 Title, Description, H1 동적 변경
-        document.getElementById('seo-title').innerText = `Learn ${cat.name} in Korean - Free Interactive Quiz`;
-        document.getElementById('seo-desc').setAttribute("content", `Master essential Korean ${cat.name} vocabulary. Practice pronunciation and test your skills with our free interactive ${cat.name} quiz!`);
-        document.getElementById('main-header').innerText = `Korean ${cat.name} Vocabulary Quiz`;
+        if (document.getElementById('seo-title')) document.getElementById('seo-title').innerText = `Learn ${cat.name} in Korean - Free Interactive Quiz`;
+        if (document.getElementById('seo-desc')) document.getElementById('seo-desc').setAttribute("content", `Master essential Korean ${cat.name} vocabulary. Practice pronunciation and test your skills with our free interactive ${cat.name} quiz!`);
+        if (document.getElementById('main-header')) document.getElementById('main-header').innerText = `Korean ${cat.name} Vocabulary Quiz`;
         injectSafeSEOData(catId);
     }
 }
@@ -117,6 +117,11 @@ function forceExternalBrowser() {
 }
 
 function initMenu() {
+    // 🌟 [독립형 페이지 예방 안전장치] 만약 독립 HTML 페이지라면 메인 메뉴판 자체를 그리지 않고 탈출합니다.
+    if (typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'))) {
+        return;
+    }
+
     const list = document.getElementById('category-list');
     if (!list) return;
 
@@ -145,10 +150,14 @@ function startQuiz(catId, updateHistory = false) {
     updateSEOData(catId);
     
     currentIdx = 0;
-    document.getElementById('menu-screen').classList.remove('active');
-    document.getElementById('quiz-screen').classList.add('active');
     
-    document.getElementById('top-open-btn').style.display = 'block';
+    const menuScr = document.getElementById('menu-screen');
+    const quizScr = document.getElementById('quiz-screen');
+    
+    if (menuScr) menuScr.classList.remove('active');
+    if (quizScr) quizScr.classList.add('active');
+    
+    if (document.getElementById('top-open-btn')) document.getElementById('top-open-btn').style.display = 'block';
     loadQuiz(true);
 }
 
@@ -156,18 +165,21 @@ function loadQuiz(autoSpeak = false) {
     resetRecognitionState();
     const data = currentCategoryData[currentIdx];
     
-    document.getElementById('situation').textContent = `${allQuizData[activeCatId].name}`;
+    if (document.getElementById('situation')) {
+        document.getElementById('situation').textContent = `${allQuizData[activeCatId].name}`;
+    }
 
     const tipEl = document.getElementById('category-tip-text');
     if (tipEl) {
-        tipEl.textContent = data.tip || "Listen and repeat the phrase!";
+        tipEl.textContent = data.tip || "Listen and repeat the phrase! 👩‍🏫";
     }
 
-    document.getElementById('korean-sentence').textContent = data.kr;
-    document.getElementById('romanization').textContent = data.rom; 
-    document.getElementById('feedback').textContent = "";
+    if (document.getElementById('korean-sentence')) document.getElementById('korean-sentence').textContent = data.kr;
+    if (document.getElementById('romanization')) document.getElementById('romanization').textContent = data.rom; 
+    if (document.getElementById('feedback')) document.getElementById('feedback').textContent = "";
     
     const container = document.getElementById('options-container');
+    if (!container) return;
     container.innerHTML = "";
     let choices = [{text: data.en, isCorrect: true}];
     
@@ -189,19 +201,31 @@ function loadQuiz(autoSpeak = false) {
 
 function checkAnswer(isCorrect, quiz) {
     if (isCorrect) {
-        document.getElementById('quiz-screen').classList.remove('active');
+        // 🌟 [핵심 수정 1] 독립형 HTML에서는 정답창 노출 시 퀴즈창을 하이드하지 않습니다. (구조 깨짐 방지)
+        const isStandalone = typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'));
+        if (!isStandalone) {
+            if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.remove('active');
+        }
         
         let detailArea = document.getElementById('detail-area');
         if (!detailArea) {
             detailArea = document.createElement('div');
             detailArea.id = 'detail-area';
-            detailArea.className = 'screen';
-            document.querySelector('.content-area').appendChild(detailArea);
+            // 독립형 페이지에서는 화면 전체를 먹어버리는 'screen' 대신 일반 박스 레이아웃 유지
+            detailArea.className = isStandalone ? 'quiz-detail-box' : 'screen';
+            
+            // 🌟 [핵심 수정 2] 예문을 무작정 바닥에 꽂지 않고, 광고창(.control-panel) '바로 직전 위치'에 안전하게 삽입합니다!
+            const controlPanel = document.querySelector('.control-panel');
+            if (controlPanel) {
+                controlPanel.parentNode.insertBefore(detailArea, controlPanel);
+            } else {
+                document.querySelector('.content-area').appendChild(detailArea);
+            }
         }
 
         detailArea.innerHTML = `
-            <div class="result-container" style="padding: 20px; text-align: left; width: 100%; max-width: 600px; margin: 0 auto;">
-                <h2 style="text-align: center; color: var(--primary);">⭕ Correct!</h2>
+            <div class="result-container" style="padding: 20px; text-align: left; width: 100%; max-width: 600px; margin: 0 auto; background: #fff; border-radius:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <h2 style="text-align: center; color: var(--primary); margin-bottom:15px;">⭕ Correct!</h2>
                 <div class="info-box" style="margin: 15px 0; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc;">
                     <p style="margin: 5px 0; font-size: 1.1rem; line-height: 1.5;"><strong>Context:</strong> ${quiz.situation}</p>
                     <p style="margin: 10px 0 5px 0; font-size: 1.1rem; color: #ef4444;"><strong>Casual:</strong> ${quiz.forms.casual || quiz.kr}</p>
@@ -217,10 +241,12 @@ function checkAnswer(isCorrect, quiz) {
                         </li>
                     `).join('')}
                 </ul>
-                <button class="esim-btn-link" style="width: 100%; margin-top: 20px; border: none; cursor: pointer; text-align: center;" onclick="goToQuiz()">Next Quiz ⏭️</button>
+                <button class="esim-btn-link" style="width: 100%; margin-top: 20px; border: none; cursor: pointer; text-align: center; display:block;" onclick="goToQuiz()">Next Quiz ⏭️</button>
             </div>
         `;
         detailArea.classList.add('active');
+        // 강제로 화면 스크롤을 예문 위치로 부드럽게 내려줍니다.
+        detailArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
     } else {
         alert("Try Again! ❌");
     }
@@ -250,7 +276,7 @@ function startSpeechRecognition() {
     const micBtn = document.getElementById('mic-btn');
     const feedback = document.getElementById('feedback');
     micBtn.classList.add('recording');
-    feedback.textContent = "Please speak now...";
+    feedback.textContent = "Please speak now... 🎤";
     feedback.style.color = "#4f46e5";
     
     recognition.start();
@@ -267,10 +293,10 @@ function startSpeechRecognition() {
         const voiced = speech.replace(/[?!\s~]/g,'');
         
         if (voiced.includes(target) || target.includes(voiced)) {
-            feedback.textContent = "Excellent!";
+            feedback.textContent = "Excellent! ✨";
             feedback.style.color = "#22c55e";
         } else {
-            feedback.textContent = "Try Again";
+            feedback.textContent = "Try Again ❌";
             feedback.style.color = "#ef4444";
         }
         micBtn.classList.remove('recording');
@@ -285,25 +311,35 @@ function nextQuiz() {
         const detailArea = document.getElementById('detail-area');
         if (detailArea) detailArea.classList.remove('active');
         
-        document.getElementById('quiz-screen').classList.add('active');
+        if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.add('active');
         loadQuiz(true);
     } else {
         alert("🎉 모든 퀴즈를 완료했습니다! 수고하셨습니다!");
-        goHome(); 
+        // 🌟 [핵심 수정 3] 독립 페이지에서는 전면 홈으로 튕겨 나가지 않고, 해당 카테고리 1번 문제로 순환 구조를 만듭니다.
+        if (typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'))) {
+            const detailArea = document.getElementById('detail-area');
+            if (detailArea) detailArea.classList.remove('active');
+            currentIdx = 0;
+            loadQuiz(true);
+        } else {
+            goHome(); 
+        }
     }
 }
 
 function speak() {
     window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(document.getElementById('korean-sentence').textContent);
+    const textEl = document.getElementById('korean-sentence');
+    if (!textEl) return;
+    const msg = new SpeechSynthesisUtterance(textEl.textContent);
     msg.lang = 'ko-KR'; msg.rate = 0.8; window.speechSynthesis.speak(msg);
 }
 
 function goHome() {
     resetRecognitionState();
-    document.getElementById('menu-screen').classList.add('active');
-    document.getElementById('quiz-screen').classList.remove('active');
-    document.getElementById('top-open-btn').style.display = 'none';
+    if (document.getElementById('menu-screen')) document.getElementById('menu-screen').classList.add('active');
+    if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.remove('active');
+    if (document.getElementById('top-open-btn')) document.getElementById('top-open-btn').style.display = 'none';
     
     window.history.pushState({}, '', window.location.pathname);
     updateSEOData(null); // 홈 메인 SEO로 복원
@@ -334,6 +370,7 @@ setInterval(() => {
 function showCorrectAnswer() {
     const quiz = currentCategoryData[currentIdx];
     const feedback = document.getElementById('feedback');
+    if (!feedback) return;
     feedback.innerHTML = "";
     
     const answerSpan = document.createElement('span');
@@ -348,6 +385,7 @@ function expandTodayQuiz() {
     const content = document.getElementById('today-quiz-content');
     const title = document.getElementById('today-title');
     const section = document.getElementById('today-quiz-section');
+    if (!content || !title || !section) return;
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
         title.textContent = "TODAY'S QUIZ";
@@ -490,15 +528,13 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// 📌 데이터가 로드될 때까지 기다렸다가 애플리케이션을 초기화하는 함수
+// 📌 데이터 로드 검증 및 최종 실행 분기 제어 함수
 function runApp() {
-    // 1. 데이터가 아직 로드되지 않았다면 0.1초 뒤에 다시 시도
     if (typeof allQuizData === 'undefined') {
         setTimeout(runApp, 100); 
         return;
     }
 
-    // 2. 데이터가 확인된 후 실행되는 본문 로직
     const userAgent = navigator.userAgent.toLowerCase();
     const isInApp = /kakaotalk|fbav|instagram|line|naver|snapchat|zum|tistory/i.test(userAgent);
     
@@ -507,11 +543,11 @@ function runApp() {
         if (openBtn) openBtn.style.display = 'block';
     }
 
-    // 1. 개별 HTML에서 설정한 CURRENT_CAT 변수가 있는지 먼저 확인
+    // 1. 개별 HTML 독립파일(예: family.html)에서 설정한 전역 변수가 최우선 구동 조건
     if (typeof CURRENT_CAT !== 'undefined' && allQuizData[CURRENT_CAT]) {
         startQuiz(CURRENT_CAT, false); 
     } 
-    // 2. 만약 변수가 없다면 기존처럼 URL 파라미터(?cat=...) 확인
+    // 2. 만약 변수가 없다면 기존처럼 URL 파라미터(?cat=...) 확인 (index.html용 메인 로직)
     else {
         const params = new URLSearchParams(window.location.search);
         const category = params.get('cat'); 
@@ -519,12 +555,11 @@ function runApp() {
         if (category && allQuizData[category]) {
             startQuiz(category, false);
         } else {
-            // 아무것도 없으면 메뉴 화면 초기화
             initMenu();
             updateSEOData(null); 
         }
     }
 }
 
-// 페이지가 준비되면 runApp 함수를 실행합니다.
+// 페이지 레이아웃 및 인프라가 대기 상태에 도달하면 자동으로 runApp을 기동합니다.
 document.addEventListener('DOMContentLoaded', runApp);
