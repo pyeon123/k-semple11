@@ -16,10 +16,15 @@
       gtag('config', 'G-8QTRE4CGNE');
     </script>
 
+    <script>
+        window.CURRENT_CAT = 'cat_01';
+        window.activeCatId = 'cat_01';
+    </script>
+
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 🚨 [긴급 조치 1] 좀비처럼 튀어나오는 하단 박스 3개는 눈에 보이지 않게 아예 물리적으로 삭제 수준으로 숨깁니다. */
+        /* 하단 박스 3개 및 가짜 메뉴 레이아웃 원천 숨김 */
         #menu-screen, #category-list, .menu-container, #category-screen, #today-quiz-section {
             display: none !important;
             visibility: hidden !important;
@@ -27,49 +32,40 @@
             height: 0 !important;
             max-height: 0 !important;
             overflow: hidden !important;
-            margin: 0 !important;
-            padding: 0 !important;
         }
 
-        /* 🚨 [긴급 조치 2] 퀴즈 화면은 자바스크립트가 꺼버리지 못하도록 무조건 강제 노출합니다. */
         #quiz-screen {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
         }
 
-        /* 🚨 [긴급 조치 3] 정답 클릭 시 생성되는 예문 영역이 절대 광고 밑으로 가지 못하도록 순서를 박살내고 강제 배치합니다. */
         .content-area {
             display: flex !important;
             flex-direction: column !important;
-            padding-bottom: 240px !important; /* 아래 공간 넉넉히 확보 */
+            padding-bottom: 120px !important;
             box-sizing: border-box !important;
         }
         
         #quiz-screen { order: 1 !important; }
         
-        /* 자바스크립트가 생성하는 예문 박스가 광고판(.control-panel)보다 무조건 위에 그리도록 강제 명령 */
+        /* 예문 박스가 무조건 광고 위에 배치되도록 유동성 부여 */
         #detail-area, .quiz-detail-box {
             order: 2 !important;
             display: block !important;
-            visibility: visible !important;
             margin: 20px auto !important;
             width: 100% !important;
-            position: relative !important;
         }
 
-        /* 🚨 [긴급 조치 4] 잘려 보이던 하단 광고판을 완전히 독립시켜서 예문 박스보다 무조건 아래에 고정시킵니다. */
         .control-panel {
             order: 3 !important;
             display: block !important;
-            visibility: visible !important;
             text-align: center !important;
             margin: 30px auto 20px auto !important;
             width: 100% !important;
             max-width: 600px !important;
         }
 
-        /* 🚨 [긴급 조치 5] 화면 맨 밑에 붙는 4버튼 바 안정화 */
         .bottom-menu {
             display: flex !important;
             position: fixed !important;
@@ -93,14 +89,6 @@
  
     <div class="content-area">
         
-        <div id="menu-screen" style="display:none !important;">
-            <div id="category-screen"> <div id="guide-box"></div> <div id="guide-content"></div> </div>
-            <div id="today-quiz-section">
-                <div id="today-title"></div> <div id="today-quiz-content"> <div id="today-kr"></div> </div>
-            </div>
-            <div id="category-list"></div> <div class="menu-container"></div>
-        </div>
-
         <div id="quiz-screen" class="quiz-screen">
             <div class="situation-tag" id="situation">Family</div>
 
@@ -158,30 +146,22 @@
 </div>
 
 <script src="date.js"></script>
-<script src="script.js"></script>
+
+<script src="script.js?v=1.1"></script>
 
 <script>
-    // 강제로 변수 세팅하고 뒤늦게 날뛰는 스크립트 실행 순서 통제
-    CURRENT_CAT = 'cat_01';
-    activeCatId = 'cat_01';
-
-    // 1초 뒤에 확실하게 한 번 더 화면 요소를 체크해서 강제로 정렬 순서를 먹입니다.
     window.addEventListener('load', function() {
         if (typeof startQuiz === 'function') {
             startQuiz('cat_01', false);
         }
         
-        // 주기적으로 돌면서 예문 박스가 생성되면 순서를 강제로 2번(광고 위)으로 지정하는 무적의 타이머
+        // 정답을 눌렀을 때 생성되는 레이아웃 보정용 타이머 안전장치
         setInterval(function() {
             let detail = document.getElementById('detail-area');
             if (detail) {
                 detail.style.order = "2";
-                detail.style.display = "block";
             }
-            // 하단 카테고리 박스는 보이는 족족 강제 무력화
-            let list = document.getElementById('category-list');
-            if (list) list.style.display = 'none';
-        }, 300);
+        }, 200);
     });
 </script>
 </body>
