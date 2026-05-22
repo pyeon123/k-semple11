@@ -165,8 +165,23 @@ function loadQuiz(autoSpeak = false) {
     if (!currentCategoryData || !currentCategoryData[currentIdx]) return;
     const data = currentCategoryData[currentIdx];
     
+    // 다음 문제로 넘어갈 때 예문 박스 숨기기 및 초기화
+    const detailArea = document.getElementById('detail-area');
+    if (detailArea) {
+        detailArea.style.display = 'none';
+        detailArea.classList.remove('active');
+    }
+
+    if (document.getElementById('quiz-screen')) {
+        document.getElementById('quiz-screen').classList.add('active');
+        document.getElementById('quiz-screen').style.display = 'block';
+    }
+
     if (document.getElementById('situation')) {
-        document.getElementById('situation').textContent = `${allQuizData[activeCatId].name}`;
+        const currentCatKey = isStandalonePage() ? (typeof CURRENT_CAT !== 'undefined' ? CURRENT_CAT : 'family') : activeCatId;
+        if (allQuizData[currentCatKey]) {
+            document.getElementById('situation').textContent = `${allQuizData[currentCatKey].name}`;
+        }
     }
 
     const tipEl = document.getElementById('category-tip-text');
@@ -199,19 +214,22 @@ function loadQuiz(autoSpeak = false) {
     if (autoSpeak) { setTimeout(speak, 1000); }
 }
 
+// 🟢 [핵심 수정] 정답 확인 및 레이아웃 제어 로직 완전 교정
 function checkAnswer(isCorrect, quiz) {
     if (isCorrect) {
-        if (!isStandalonePage()) {
-            if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.remove('active');
+        const quizScreen = document.getElementById('quiz-screen');
+        
+        // 정답을 맞히면 메인 퀴즈의 선택지 영역만 숨겨 가독성을 높입니다.
+        if (quizScreen) {
+            const container = document.getElementById('options-container');
+            if (container) container.innerHTML = "";
         }
         
         let detailArea = document.getElementById('detail-area');
         if (!detailArea) {
             detailArea = document.createElement('div');
             detailArea.id = 'detail-area';
-            detailArea.className = isStandalonePage() ? 'quiz-detail-box' : 'screen';
-            
-            // 🌟 광고판(.control-panel)의 직전 위치에 정확하게 배치합니다.
+            detailArea.className = 'quiz-detail-box';
             const controlPanel = document.querySelector('.control-panel');
             if (controlPanel) {
                 controlPanel.parentNode.insertBefore(detailArea, controlPanel);
@@ -220,6 +238,7 @@ function checkAnswer(isCorrect, quiz) {
             }
         }
 
+        // 예문 상세 화면 렌더링
         detailArea.innerHTML = `
             <div class="result-container" style="padding: 20px; text-align: left; width: 100%; max-width: 600px; margin: 0 auto; background: #fff; border-radius:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 <h2 style="text-align: center; color: var(--primary); margin-bottom:15px;">⭕ Correct!</h2>
@@ -241,6 +260,8 @@ function checkAnswer(isCorrect, quiz) {
                 <button class="esim-btn-link" style="width: 100%; margin-top: 20px; border: none; cursor: pointer; text-align: center; display:block;" onclick="goToQuiz()">Next Quiz ⏭️</button>
             </div>
         `;
+        
+        detailArea.style.display = 'block';
         detailArea.classList.add('active');
         detailArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
     } else {
@@ -304,17 +325,11 @@ function startSpeechRecognition() {
 function nextQuiz() {
     currentIdx++;
     if (currentIdx < currentCategoryData.length) {
-        const detailArea = document.getElementById('detail-area');
-        if (detailArea) detailArea.classList.remove('active');
-        
-        if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.add('active');
         loadQuiz(true);
     } else {
-        alert("🎉 모든 퀴즈를 완료했습니다! 수고하셨습니다!");
+        alert("🎉 Excellent job! You've completed all quizzes in this category!");
+        currentIdx = 0;
         if (isStandalonePage()) {
-            const detailArea = document.getElementById('detail-area');
-            if (detailArea) detailArea.classList.remove('active');
-            currentIdx = 0;
             loadQuiz(true);
         } else {
             goHome(); 
@@ -332,10 +347,20 @@ function speak() {
 
 function goHome() {
     resetRecognitionState();
+    if (isStandalonePage()) {
+        window.location.href = "index.html";
+        return;
+    }
     if (document.getElementById('menu-screen')) document.getElementById('menu-screen').classList.add('active');
     if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.remove('active');
     if (document.getElementById('top-open-btn')) document.getElementById('top-open-btn').style.display = 'none';
     
+    const detailArea = document.getElementById('detail-area');
+    if (detailArea) {
+        detailArea.style.display = 'none';
+        detailArea.classList.remove('active');
+    }
+
     window.history.pushState({}, '', window.location.pathname);
     updateSEOData(null);
     
@@ -542,6 +567,16 @@ function runApp() {
     if (typeof CURRENT_CAT !== 'undefined' && allQuizData[CURRENT_CAT]) {
         startQuiz(CURRENT_CAT, false); 
     } 
+    else if (isStandalonePage()) {
+        // 독립적인 파일명 분석 (예: family.html -> family)
+        const path = window.location.pathname;
+        const pageName = path.substring(path.lastIndexOf("/") + 1).replace(".html", "");
+        if (allQuizData[pageName]) {
+            startQuiz(pageName, false);
+        } else {
+            startQuiz('family', false); // 기본값 매칭 예외처리
+        }
+    }
     else {
         const params = new URLSearchParams(window.location.search);
         const category = params.get('cat'); 
