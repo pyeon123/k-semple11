@@ -19,55 +19,64 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 🌟 3일간의 삽질을 끝낼 핵심 CSS 규칙 */
-        
-        /* 1. 자바스크립트가 뒤늦게 그리는 메인 메뉴판 영역을 형체도 없이 박멸 */
-        #menu-screen, #category-list, .menu-container { 
-            display: none !important; 
-            visibility: hidden !important; 
-            height: 0 !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
+        /* 🚨 [긴급 조치 1] 좀비처럼 튀어나오는 하단 박스 3개는 눈에 보이지 않게 아예 물리적으로 삭제 수준으로 숨깁니다. */
+        #menu-screen, #category-list, .menu-container, #category-screen, #today-quiz-section {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        /* 2. 퀴즈 화면은 항상 무조건 화면에 노출 */
-        #quiz-screen { 
-            display: block !important; 
-            opacity: 1 !important; 
-            visibility: visible !important; 
-        }
-
-        /* 3. [치트키] 정답을 누르면 광고 밑으로 기어 들어가던 예문 박스(.screen)를 강제로 끄집어 올려 위치 고정 */
-        #detail-area.screen {
+        /* 🚨 [긴급 조치 2] 퀴즈 화면은 자바스크립트가 꺼버리지 못하도록 무조건 강제 노출합니다. */
+        #quiz-screen {
             display: block !important;
-            position: relative !important;
             visibility: visible !important;
-            width: 100% !important;
-            max-width: 600px !important;
-            margin: 20px auto !important;
-            z-index: 100 !important;
-            background: #ffffff !important;
+            opacity: 1 !important;
         }
 
-        /* 4. 전체 레이아웃 순서 강제 제어 (Flexbox order 활용) */
+        /* 🚨 [긴급 조치 3] 정답 클릭 시 생성되는 예문 영역이 절대 광고 밑으로 가지 못하도록 순서를 박살내고 강제 배치합니다. */
         .content-area {
             display: flex !important;
             flex-direction: column !important;
-            padding-bottom: 140px !important;
+            padding-bottom: 240px !important; /* 아래 공간 넉넉히 확보 */
             box-sizing: border-box !important;
         }
+        
         #quiz-screen { order: 1 !important; }
-        #detail-area { order: 2 !important; } /* 👈 정답 예문이 무조건 광고 위(2등)로 옵니다. */
-        .control-panel { order: 3 !important; } /* 👈 광고는 무조건 예문 밑(3등)으로 밀려납니다. */
+        
+        /* 자바스크립트가 생성하는 예문 박스가 광고판(.control-panel)보다 무조건 위에 그리도록 강제 명령 */
+        #detail-area, .quiz-detail-box {
+            order: 2 !important;
+            display: block !important;
+            visibility: visible !important;
+            margin: 20px auto !important;
+            width: 100% !important;
+            position: relative !important;
+        }
 
-        /* 5. 최하단 고정 4버튼 바 */
+        /* 🚨 [긴급 조치 4] 잘려 보이던 하단 광고판을 완전히 독립시켜서 예문 박스보다 무조건 아래에 고정시킵니다. */
+        .control-panel {
+            order: 3 !important;
+            display: block !important;
+            visibility: visible !important;
+            text-align: center !important;
+            margin: 30px auto 20px auto !important;
+            width: 100% !important;
+            max-width: 600px !important;
+        }
+
+        /* 🚨 [긴급 조치 5] 화면 맨 밑에 붙는 4버튼 바 안정화 */
         .bottom-menu {
             display: flex !important;
             position: fixed !important;
             bottom: 0 !important;
             left: 0 !important;
             width: 100% !important;
-            z-index: 9999 !important;
+            z-index: 99999 !important;
             background-color: #ffffff !important;
             box-shadow: 0 -3px 10px rgba(0,0,0,0.1) !important;
         }
@@ -84,18 +93,12 @@
  
     <div class="content-area">
         
-        <div id="menu-screen" class="screen">
+        <div id="menu-screen" style="display:none !important;">
             <div id="category-screen"> <div id="guide-box"></div> <div id="guide-content"></div> </div>
             <div id="today-quiz-section">
-                <div id="today-title"></div>
-                <div id="today-quiz-content">
-                    <div id="teacher-tip-text"></div> <div id="today-kr"></div> <div id="today-rom"></div>
-                    <button id="today-mic-btn" onclick="startTodayRecognition()"></button> 
-                    <div id="today-feedback"></div> <div id="today-options"></div>
-                </div>
+                <div id="today-title"></div> <div id="today-quiz-content"> <div id="today-kr"></div> </div>
             </div>
-            <div id="category-list"></div> 
-            <div class="menu-container"></div>
+            <div id="category-list"></div> <div class="menu-container"></div>
         </div>
 
         <div id="quiz-screen" class="quiz-screen">
@@ -124,7 +127,6 @@
             </div>
             
             <div id="feedback" style="height: 35px; font-weight: 900; font-size: 1.4rem; margin-bottom: 10px; text-align: center;"></div>
-            
             <div class="options-container" id="options-container"></div>
 
             <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 25px; margin-bottom: 20px;">
@@ -159,26 +161,27 @@
 <script src="script.js"></script>
 
 <script>
-    // 1. 자바스크립트 로직 흐름 강제 제어
+    // 강제로 변수 세팅하고 뒤늦게 날뛰는 스크립트 실행 순서 통제
     CURRENT_CAT = 'cat_01';
     activeCatId = 'cat_01';
 
-    // 2. DOMContentLoaded 이후에 지각 실행되는 initMenu가 3개 박스를 그리는 족족 화면에서 숨김 처리되도록 보장
-    if (typeof initMenu === 'function') {
-        const originalInitMenu = initMenu;
-        initMenu = function() {
-            originalInitMenu();
-            const list = document.getElementById('category-list');
-            if (list) list.style.display = 'none';
-        };
-    }
-
-    // 3. 즉시 패밀리 퀴즈 실행
+    // 1초 뒤에 확실하게 한 번 더 화면 요소를 체크해서 강제로 정렬 순서를 먹입니다.
     window.addEventListener('load', function() {
         if (typeof startQuiz === 'function') {
             startQuiz('cat_01', false);
-            document.getElementById('quiz-screen').classList.add('active');
         }
+        
+        // 주기적으로 돌면서 예문 박스가 생성되면 순서를 강제로 2번(광고 위)으로 지정하는 무적의 타이머
+        setInterval(function() {
+            let detail = document.getElementById('detail-area');
+            if (detail) {
+                detail.style.order = "2";
+                detail.style.display = "block";
+            }
+            // 하단 카테고리 박스는 보이는 족족 강제 무력화
+            let list = document.getElementById('category-list');
+            if (list) list.style.display = 'none';
+        }, 300);
     });
 </script>
 </body>
