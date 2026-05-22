@@ -19,27 +19,48 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* 🌟 핵심 치트키: 화면에 보여지는 요소들의 순서를 강제로 통제합니다. */
+        /* 🌟 3일간의 삽질을 끝낼 핵심 CSS 규칙 */
+        
+        /* 1. 자바스크립트가 뒤늦게 그리는 메인 메뉴판 영역을 형체도 없이 박멸 */
+        #menu-screen, #category-list, .menu-container { 
+            display: none !important; 
+            visibility: hidden !important; 
+            height: 0 !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+        }
+
+        /* 2. 퀴즈 화면은 항상 무조건 화면에 노출 */
+        #quiz-screen { 
+            display: block !important; 
+            opacity: 1 !important; 
+            visibility: visible !important; 
+        }
+
+        /* 3. [치트키] 정답을 누르면 광고 밑으로 기어 들어가던 예문 박스(.screen)를 강제로 끄집어 올려 위치 고정 */
+        #detail-area.screen {
+            display: block !important;
+            position: relative !important;
+            visibility: visible !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            margin: 20px auto !important;
+            z-index: 100 !important;
+            background: #ffffff !important;
+        }
+
+        /* 4. 전체 레이아웃 순서 강제 제어 (Flexbox order 활용) */
         .content-area {
             display: flex !important;
             flex-direction: column !important;
             padding-bottom: 140px !important;
             box-sizing: border-box !important;
-            min-height: calc(100vh - 60px) !important;
         }
+        #quiz-screen { order: 1 !important; }
+        #detail-area { order: 2 !important; } /* 👈 정답 예문이 무조건 광고 위(2등)로 옵니다. */
+        .control-panel { order: 3 !important; } /* 👈 광고는 무조건 예문 밑(3등)으로 밀려납니다. */
 
-        /* 1. 퀴즈 화면과 정답 예문 박스(detail-area)를 무조건 상단에 위치시킵니다. */
-        #quiz-screen { order: 1 !important; display: block !important; }
-        #detail-area { order: 2 !important; display: block !important; margin-top: 20px !important; }
-
-        /* 2. 하단 eSIM 광고 영역을 무조건 정답 예문보다 밑에 배치합니다. */
-        .control-panel { order: 3 !important; text-align: center; margin: 30px auto 10px auto; width: 100%; max-width: 600px; position: relative; z-index: 1000; }
-
-        /* 3. 난동 부리는 메인 메뉴판(박스 3개)은 구조상 살아있되, 화면에서는 완벽히 지워버립니다. */
-        #menu-screen { display: none !important; }
-        #category-list, .menu-container { display: none !important; }
-
-        /* 4. 최하단 고정 메뉴 바 */
+        /* 5. 최하단 고정 4버튼 바 */
         .bottom-menu {
             display: flex !important;
             position: fixed !important;
@@ -138,16 +159,24 @@
 <script src="script.js"></script>
 
 <script>
-    // 1. 뒤늦게 실행되는 initMenu가 3개 박스를 화면에 추가하더라도 CSS display: none이 원천 봉쇄함
-    // 2. 변수 사전 고정
+    // 1. 자바스크립트 로직 흐름 강제 제어
     CURRENT_CAT = 'cat_01';
     activeCatId = 'cat_01';
 
-    // 3. 페이지 로드 완료 즉시 패밀리 퀴즈 실행 유도
+    // 2. DOMContentLoaded 이후에 지각 실행되는 initMenu가 3개 박스를 그리는 족족 화면에서 숨김 처리되도록 보장
+    if (typeof initMenu === 'function') {
+        const originalInitMenu = initMenu;
+        initMenu = function() {
+            originalInitMenu();
+            const list = document.getElementById('category-list');
+            if (list) list.style.display = 'none';
+        };
+    }
+
+    // 3. 즉시 패밀리 퀴즈 실행
     window.addEventListener('load', function() {
         if (typeof startQuiz === 'function') {
             startQuiz('cat_01', false);
-            // 정답을 체크했을 때 화면이 통째로 숨겨지는 원본 로직 강제 방어
             document.getElementById('quiz-screen').classList.add('active');
         }
     });
