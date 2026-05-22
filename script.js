@@ -26,7 +26,6 @@ function visitFacebook() {
 // 🟢 카테고리별 동적 SEO 업데이트 함수
 function updateSEOData(catId) {
     if (!catId) {
-        // 메인 홈 화면용 기본 SEO
         if (document.getElementById('seo-title')) document.getElementById('seo-title').innerText = "Learn Korean Game: 1,000+ Word Quiz (FREE)";
         if (document.getElementById('seo-desc')) document.getElementById('seo-desc').setAttribute("content", "Master Korean through fun interactive games! Challenge yourself with over 1,000 Korean Word quizzes. Perfect for K-Drama fans and learners worldwide.");
         if (document.getElementById('main-header')) document.getElementById('main-header').innerText = "Learn Korean Game: 1,000+ Word Quiz";
@@ -36,7 +35,6 @@ function updateSEOData(catId) {
 
     const cat = allQuizData[catId];
     if (cat) {
-        // 카테고리에 맞는 Title, Description, H1 동적 변경
         if (document.getElementById('seo-title')) document.getElementById('seo-title').innerText = `Learn ${cat.name} in Korean - Free Interactive Quiz`;
         if (document.getElementById('seo-desc')) document.getElementById('seo-desc').setAttribute("content", `Master essential Korean ${cat.name} vocabulary. Practice pronunciation and test your skills with our free interactive ${cat.name} quiz!`);
         if (document.getElementById('main-header')) document.getElementById('main-header').innerText = `Korean ${cat.name} Vocabulary Quiz`;
@@ -76,7 +74,7 @@ function injectSafeSEOData(specificCatId) {
             "learningResourceType": "Vocabulary List",
             "about": []
         };
-        category.data.slice(0, 10).forEach(item => { // SEO 성능을 위해 최대 10개 항목만 인덱싱
+        category.data.slice(0, 10).forEach(item => {
             categoryResource.about.push({
                 "@type": "DefinedTerm",
                 "termCode": item.en,
@@ -116,11 +114,12 @@ function forceExternalBrowser() {
     }
 }
 
+function isStandalonePage() {
+    return typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'));
+}
+
 function initMenu() {
-    // 🌟 [독립형 페이지 예방 안전장치] 만약 독립 HTML 페이지라면 메인 메뉴판 자체를 그리지 않고 탈출합니다.
-    if (typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'))) {
-        return;
-    }
+    if (isStandalonePage()) return;
 
     const list = document.getElementById('category-list');
     if (!list) return;
@@ -138,6 +137,8 @@ function initMenu() {
 }
 
 function startQuiz(catId, updateHistory = false) {
+    if (!allQuizData || !allQuizData[catId]) return;
+    
     activeCatId = catId;
     currentCategoryData = allQuizData[catId].data;
     activeCategoryName = allQuizData[catId].name; 
@@ -146,9 +147,7 @@ function startQuiz(catId, updateHistory = false) {
         window.history.pushState({cat: catId}, '', `?cat=${catId}`);
     }
     
-    // 카테고리 진입 시 SEO 동적 업데이트
     updateSEOData(catId);
-    
     currentIdx = 0;
     
     const menuScr = document.getElementById('menu-screen');
@@ -163,6 +162,7 @@ function startQuiz(catId, updateHistory = false) {
 
 function loadQuiz(autoSpeak = false) {
     resetRecognitionState();
+    if (!currentCategoryData || !currentCategoryData[currentIdx]) return;
     const data = currentCategoryData[currentIdx];
     
     if (document.getElementById('situation')) {
@@ -201,9 +201,7 @@ function loadQuiz(autoSpeak = false) {
 
 function checkAnswer(isCorrect, quiz) {
     if (isCorrect) {
-        // 🌟 [핵심 수정 1] 독립형 HTML에서는 정답창 노출 시 퀴즈창을 하이드하지 않습니다. (구조 깨짐 방지)
-        const isStandalone = typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'));
-        if (!isStandalone) {
+        if (!isStandalonePage()) {
             if (document.getElementById('quiz-screen')) document.getElementById('quiz-screen').classList.remove('active');
         }
         
@@ -211,10 +209,9 @@ function checkAnswer(isCorrect, quiz) {
         if (!detailArea) {
             detailArea = document.createElement('div');
             detailArea.id = 'detail-area';
-            // 독립형 페이지에서는 화면 전체를 먹어버리는 'screen' 대신 일반 박스 레이아웃 유지
-            detailArea.className = isStandalone ? 'quiz-detail-box' : 'screen';
+            detailArea.className = isStandalonePage() ? 'quiz-detail-box' : 'screen';
             
-            // 🌟 [핵심 수정 2] 예문을 무작정 바닥에 꽂지 않고, 광고창(.control-panel) '바로 직전 위치'에 안전하게 삽입합니다!
+            // 🌟 광고판(.control-panel)의 직전 위치에 정확하게 배치합니다.
             const controlPanel = document.querySelector('.control-panel');
             if (controlPanel) {
                 controlPanel.parentNode.insertBefore(detailArea, controlPanel);
@@ -245,7 +242,6 @@ function checkAnswer(isCorrect, quiz) {
             </div>
         `;
         detailArea.classList.add('active');
-        // 강제로 화면 스크롤을 예문 위치로 부드럽게 내려줍니다.
         detailArea.scrollIntoView({ behavior: 'smooth', block: 'end' });
     } else {
         alert("Try Again! ❌");
@@ -315,8 +311,7 @@ function nextQuiz() {
         loadQuiz(true);
     } else {
         alert("🎉 모든 퀴즈를 완료했습니다! 수고하셨습니다!");
-        // 🌟 [핵심 수정 3] 독립 페이지에서는 전면 홈으로 튕겨 나가지 않고, 해당 카테고리 1번 문제로 순환 구조를 만듭니다.
-        if (typeof CURRENT_CAT !== 'undefined' || (window.location.pathname.includes('.html') && !window.location.pathname.includes('index.html'))) {
+        if (isStandalonePage()) {
             const detailArea = document.getElementById('detail-area');
             if (detailArea) detailArea.classList.remove('active');
             currentIdx = 0;
@@ -342,13 +337,12 @@ function goHome() {
     if (document.getElementById('top-open-btn')) document.getElementById('top-open-btn').style.display = 'none';
     
     window.history.pushState({}, '', window.location.pathname);
-    updateSEOData(null); // 홈 메인 SEO로 복원
+    updateSEOData(null);
     
     closeTodayQuiz();
     hideGuide();
 }
 
-// 광고 영역 텍스트 애니메이션
 const adTexts = [
     "No internet in Korea? You'll need data!",
     "Maps won't work without internet",
@@ -368,6 +362,7 @@ setInterval(() => {
 }, 4500);
 
 function showCorrectAnswer() {
+    if (!currentCategoryData || !currentCategoryData[currentIdx]) return;
     const quiz = currentCategoryData[currentIdx];
     const feedback = document.getElementById('feedback');
     if (!feedback) return;
@@ -380,7 +375,6 @@ function showCorrectAnswer() {
     speak();
 }
 
-// ---------------- 오늘의 퀴즈 기능 유지 ----------------
 function expandTodayQuiz() {
     const content = document.getElementById('today-quiz-content');
     const title = document.getElementById('today-title');
@@ -415,6 +409,7 @@ function setupTodayQuiz() {
     document.getElementById('today-rom').textContent = todayQuizData.rom;
 
     const container = document.getElementById('today-options');
+    if (!container) return;
     container.innerHTML = "";
     
     let choices = [{text: todayQuizData.en, isCorrect: true}];
@@ -447,6 +442,7 @@ function todaySpeak() {
 
 function checkTodayAnswer(isCorrect) {
     const feedback = document.getElementById('today-feedback');
+    if (!feedback) return;
     if (isCorrect) {
         feedback.textContent = "Excellent! 🎉";
         feedback.style.color = "#22c55e";
@@ -465,6 +461,7 @@ function startTodayRecognition() {
     if (!recognition) return;
     const micBtn = document.getElementById('today-mic-btn');
     const feedback = document.getElementById('today-feedback');
+    if (!feedback) return;
     
     micBtn.classList.add('recording');
     feedback.textContent = "Please speak now...";
@@ -485,7 +482,7 @@ function startTodayRecognition() {
         micBtn.classList.remove('recording');
     };
     recognition.onerror = () => {
-        micBtn.classList.remove('recording');
+        if(micBtn) micBtn.classList.remove('recording');
         feedback.textContent = "Error occurred. Try again.";
     };
 }
@@ -528,7 +525,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// 📌 데이터 로드 검증 및 최종 실행 분기 제어 함수
 function runApp() {
     if (typeof allQuizData === 'undefined') {
         setTimeout(runApp, 100); 
@@ -543,11 +539,9 @@ function runApp() {
         if (openBtn) openBtn.style.display = 'block';
     }
 
-    // 1. 개별 HTML 독립파일(예: family.html)에서 설정한 전역 변수가 최우선 구동 조건
     if (typeof CURRENT_CAT !== 'undefined' && allQuizData[CURRENT_CAT]) {
         startQuiz(CURRENT_CAT, false); 
     } 
-    // 2. 만약 변수가 없다면 기존처럼 URL 파라미터(?cat=...) 확인 (index.html용 메인 로직)
     else {
         const params = new URLSearchParams(window.location.search);
         const category = params.get('cat'); 
@@ -561,5 +555,4 @@ function runApp() {
     }
 }
 
-// 페이지 레이아웃 및 인프라가 대기 상태에 도달하면 자동으로 runApp을 기동합니다.
 document.addEventListener('DOMContentLoaded', runApp);
